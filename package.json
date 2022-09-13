@@ -1,0 +1,7 @@
+{
+  "name": "okayu",
+  "packageManager": "yarn@3.2.3",
+  "dependencies": {
+    "puppeteer": "17.1.3"
+  }
+}
