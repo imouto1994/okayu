@@ -3,21 +3,18 @@ const fs = require("fs");
 const fsPromises = require("fs/promises");
 const path = require("path");
 
-const { hideHeadless } = require("./stealth");
-
-// Get user data
-const userJson = fs.readFileSync(path.join(process.cwd(), "./user.json"));
+const { hideHeadless } = require("../../stealth");
 
 const VIEWPORT_WIDTH = 800;
 const VIEWPORT_HEIGHT = 600;
 
-async function downloadChapter(chapterUrl) {
+async function getChapterUrls(titleUrl) {
   const browser = await puppeteer.launch({
-    // args: [
-    //   "--disable-web-security",
-    //   "--disable-features=IsolateOrigins",
-    //   " --disable-site-isolation-trials",
-    // ],
+    args: [
+      "--disable-web-security",
+      "--disable-features=IsolateOrigins",
+      " --disable-site-isolation-trials",
+    ],
     headless: true,
   });
   const page = await browser.newPage();
@@ -28,35 +25,7 @@ async function downloadChapter(chapterUrl) {
     deviceScaleFactor: 1,
   });
 
-  await page.goto(chapterUrl);
-
-  await page.evaluate((user) => {
-    localStorage.setItem("user", user);
-  }, userJson);
-
-  await page.goto(chapterUrl);
-
-  await browser.close();
-}
-
-async function getChapterUrls(titleUrl) {
-  const browser = await puppeteer.launch({
-    args: [
-      "--disable-web-security",
-      "--disable-features=IsolateOrigins",
-      " --disable-site-isolation-trials",
-    ],
-    headless: false,
-  });
-  const page = await browser.newPage();
-
-  await page.setViewport({
-    width: VIEWPORT_WIDTH,
-    height: VIEWPORT_HEIGHT,
-    deviceScaleFactor: 1,
-  });
-
-  // await hideHeadless(page);
+  await hideHeadless(page);
 
   await page.setRequestInterception(true);
 
@@ -72,9 +41,6 @@ async function getChapterUrls(titleUrl) {
 
   console.log("Inject local storage!");
 
-  await page.evaluate(() => {
-    localStorage.setItem("user", ``);
-  });
   await page.goto(titleUrl);
 
   console.log("Page title loaded!");
@@ -132,7 +98,6 @@ async function processChapterRows(rows) {
 }
 
 (async () => {
-  await getChapterUrls(
-    "https://vip.bachngocsach.com/truyen/trung-nhien/304.html"
-  );
+  // TODO: Add series URL
+  await getChapterUrls("");
 })();

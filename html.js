@@ -11,12 +11,13 @@ const chaptersJson = fs.readFileSync(
 const chapters = JSON.parse(chaptersJson);
 
 (async () => {
-  for (const chapter of chapters) {
+  for (let i = 327; i < chapters.length; i++) {
+    const chapter = chapters[i];
     const [_, chapterIndex, chapterTitle] = chapter;
     const chapterContent = fs.readFileSync(
       path.join(
         process.cwd(),
-        `./content/${String(chapterIndex).padStart(3, "0")}.txt`
+        `./content/${String(chapterIndex).padStart(4, "0")}.txt`
       ),
       {
         encoding: "utf-8",
@@ -37,12 +38,12 @@ const chapters = JSON.parse(chaptersJson);
   <section epub:type="chapter">
     <h2>${chapterTitle}</h2>
 
-${chapterLines.map((line) => `    <p>${line}</p>\n\n`).join("")}
+${chapterLines.map((line) => `    <p>${line.trim()}</p>\n\n`).join("")}
   </section>
 </body>
 </html>`;
     await fsPromises.writeFile(
-      `./html/Chapter-${String(chapterIndex).padStart(3, "0")}.xhtml`,
+      `./html/Chapter-${String(chapterIndex).padStart(4, "0")}.xhtml`,
       htmlContent
     );
   }

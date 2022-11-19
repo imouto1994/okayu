@@ -3,7 +3,7 @@ const fs = require("fs");
 const fsPromises = require("fs/promises");
 const path = require("path");
 
-const { hideHeadless } = require("./stealth");
+const { hideHeadless } = require("../../stealth");
 
 // Get chapters JSON
 const chaptersJson = fs.readFileSync(
@@ -30,7 +30,7 @@ async function downloadChapter(page, chapter) {
     e.textContent.trim()
   );
   await fsPromises.writeFile(
-    `./content/${String(chapterIndex).padStart(3, "0")}.txt`,
+    `./content/${String(chapterIndex).padStart(4, "0")}.txt`,
     chapterContent
   );
 }
@@ -70,10 +70,11 @@ async function downloadChapter(page, chapter) {
   console.log("Inject local storage!");
 
   await page.evaluate(() => {
+    // TODO: Add `user` value
     localStorage.setItem("user", ``);
   });
 
-  for (let i = 373; i < chapters.length; i++) {
+  for (let i = 0; i < chapters.length; i++) {
     const chapter = chapters[i];
     await downloadChapter(page, chapter);
   }

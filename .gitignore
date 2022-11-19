@@ -9,5 +9,8 @@
 node_modules/
 
 user.json
+chapters.json
 content/
 html/
+
+.DS_Store
