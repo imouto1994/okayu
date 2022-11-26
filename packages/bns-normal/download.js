@@ -13,7 +13,7 @@ const chapters = JSON.parse(chaptersJson);
 
 const VIEWPORT_WIDTH = 800;
 const VIEWPORT_HEIGHT = 600;
-const CHAPTER_DOMAIN = "https://vip.bachngocsach.com";
+const CHAPTER_DOMAIN = "https://bachngocsach.com";
 
 async function downloadChapter(page, chapter) {
   const [chapterPath, chapterIndex, chapterTitle] = chapter;
@@ -22,10 +22,8 @@ async function downloadChapter(page, chapter) {
   await page.goto(chapterUrl);
 
   console.log("Page chapter loaded!");
-  await page.waitForSelector("#chapter-id span.webkit-chapter");
-  const chapterContentElementHandle = await page.$(
-    "#chapter-id span.webkit-chapter"
-  );
+  await page.waitForSelector("div#noi-dung");
+  const chapterContentElementHandle = await page.$("div#noi-dung");
   const chapterContent = await chapterContentElementHandle.evaluate((e) =>
     e.textContent.trim()
   );
@@ -63,16 +61,6 @@ async function downloadChapter(page, chapter) {
       req.continue();
     }
   });
-
-  // const sampleUrl = `${CHAPTER_DOMAIN}${chapters[0][0]}`;
-  // await page.goto(sampleUrl);
-
-  // console.log("Inject local storage!");
-
-  // await page.evaluate(() => {
-  //   // TODO: Add `user` value
-  //   localStorage.setItem("user", ``);
-  // });
 
   for (let i = 0; i < chapters.length; i++) {
     const chapter = chapters[i];

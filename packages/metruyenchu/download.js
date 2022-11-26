@@ -13,7 +13,7 @@ const chapters = JSON.parse(chaptersJson);
 
 const VIEWPORT_WIDTH = 800;
 const VIEWPORT_HEIGHT = 600;
-const CHAPTER_DOMAIN = "https://vip.bachngocsach.com";
+const CHAPTER_DOMAIN = "https://metruyencv.com/truyen/";
 
 async function downloadChapter(page, chapter) {
   const [chapterPath, chapterIndex, chapterTitle] = chapter;
@@ -22,13 +22,38 @@ async function downloadChapter(page, chapter) {
   await page.goto(chapterUrl);
 
   console.log("Page chapter loaded!");
-  await page.waitForSelector("#chapter-id span.webkit-chapter");
-  const chapterContentElementHandle = await page.$(
-    "#chapter-id span.webkit-chapter"
-  );
-  const chapterContent = await chapterContentElementHandle.evaluate((e) =>
-    e.textContent.trim()
-  );
+  await page.waitForSelector("div#js-read__content");
+  const chapterContentElementHandle = await page.$("div#js-read__content");
+  const chapterContent = await chapterContentElementHandle.evaluate((e) => {
+    const adPrefixes = [
+      `"Mười vạn năm trước, Kiếp Dân phủ xuống. Cổ Thiên Đình chỉ`,
+      `Mười vạn năm sau, Đông Hoang Việt quốc, một gã Chân Nhân`,
+      `Mời đọc:`,
+      `Mông Cổ nam chinh, Tống triều loạn lạc. Đại Việt`,
+    ];
+
+    for (const child of e.children) {
+      if (child.tagName !== "BR") {
+        e.removeChild(child);
+      }
+    }
+    const textContent = e.innerHTML.replaceAll("<br>", "\n");
+    const lines = textContent.split("\n").map((line) => line.trim());
+    const cleanTextContent = lines
+      .filter((line) => {
+        for (const adPrefix of adPrefixes) {
+          if (line.startsWith(adPrefix)) {
+            return false;
+          }
+        }
+
+        return true;
+      })
+      .filter((line) => line.length > 0)
+      .join("\n");
+
+    return cleanTextContent;
+  });
   await fsPromises.writeFile(
     `./content/${String(chapterIndex).padStart(4, "0")}.txt`,
     chapterContent
@@ -63,16 +88,6 @@ async function downloadChapter(page, chapter) {
       req.continue();
     }
   });
-
-  // const sampleUrl = `${CHAPTER_DOMAIN}${chapters[0][0]}`;
-  // await page.goto(sampleUrl);
-
-  // console.log("Inject local storage!");
-
-  // await page.evaluate(() => {
-  //   // TODO: Add `user` value
-  //   localStorage.setItem("user", ``);
-  // });
 
   for (let i = 0; i < chapters.length; i++) {
     const chapter = chapters[i];

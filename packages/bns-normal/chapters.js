@@ -41,36 +41,11 @@ async function getChapterUrls(titleUrl) {
 
   console.log("Page title loaded!");
 
-  await page.waitForSelector("div#list-chapters");
-  await page.click("div#list-chapters");
+  await page.waitForSelector("div#mucluc-list");
 
-  console.log("View chapters in first page!");
+  const rows = await page.$$("a.chuong-link");
+  const chapters = await processChapterRows(rows);
 
-  let chapters = [];
-  let rows;
-  let nextButton;
-  let nextButtonDisabled;
-
-  await page.waitForSelector("table#list-chapters .chapter.table-row");
-  rows = await page.$$("table#list-chapters .chapter.table-row");
-  chapters = chapters.concat(await processChapterRows(rows));
-  nextButton = await page.$("table#list-chapters + div li:last-of-type");
-  nextButtonDisabled = await nextButton.evaluate(
-    (e) => e.getAttribute("class") === "disabled"
-  );
-
-  while (!nextButtonDisabled) {
-    nextButton.click();
-    await page.waitForTimeout(2000);
-    await page.waitForSelector("table#list-chapters a.chapter.table-row");
-    rows = await page.$$("table#list-chapters a.chapter.table-row");
-    chapters = chapters.concat(await processChapterRows(rows));
-    nextButton = await page.$("table#list-chapters + div li:last-of-type");
-    nextButtonDisabled = await nextButton.evaluate(
-      (e) => e.getAttribute("class") === "disabled"
-    );
-    console.log("Viewing chapters in next page!");
-  }
   await fsPromises.writeFile(
     "./chapters.json",
     JSON.stringify(chapters, null, 2)
@@ -80,13 +55,12 @@ async function getChapterUrls(titleUrl) {
 
 async function processChapterRows(rows) {
   const chapters = [];
-  for (const row of rows) {
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
     const chapterUrl = await row.evaluate((e) => e.getAttribute("href"));
-    const chapterNo = await (
-      await row.$(".text-center")
-    ).evaluate((e) => e.textContent.trim());
+    const chapterNo = i + 1;
     const chapterName = await (
-      await row.$(".chapter-name")
+      await row.$(".chuong-name")
     ).evaluate((e) => e.textContent.trim());
     chapters.push([chapterUrl, chapterNo, chapterName]);
   }
@@ -96,6 +70,6 @@ async function processChapterRows(rows) {
 (async () => {
   // TODO: Add series URL
   await getChapterUrls(
-    "https://vip.bachngocsach.com/truyen/dai-niet-ban/192.html"
+    "https://bachngocsach.com/reader/an-sat/muc-luc?page=all"
   );
 })();

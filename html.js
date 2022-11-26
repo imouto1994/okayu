@@ -11,7 +11,7 @@ const chaptersJson = fs.readFileSync(
 const chapters = JSON.parse(chaptersJson);
 
 (async () => {
-  for (let i = 327; i < chapters.length; i++) {
+  for (let i = 0; i < chapters.length; i++) {
     const chapter = chapters[i];
     const [_, chapterIndex, chapterTitle] = chapter;
     const chapterContent = fs.readFileSync(
