@@ -22,14 +22,17 @@ async function downloadChapter(page, chapter) {
   await page.goto(chapterUrl);
 
   console.log("Page chapter loaded!");
-  await page.waitForSelector("div#js-read__content");
-  const chapterContentElementHandle = await page.$("div#js-read__content");
+  await page.waitForSelector("div#js-read__content div#article");
+  const chapterContentElementHandle = await page.$(
+    "div#js-read__content div#article"
+  );
   const chapterContent = await chapterContentElementHandle.evaluate((e) => {
     const adPrefixes = [
       `"Mười vạn năm trước, Kiếp Dân phủ xuống. Cổ Thiên Đình chỉ`,
       `Mười vạn năm sau, Đông Hoang Việt quốc, một gã Chân Nhân`,
       `Mời đọc:`,
       `Mông Cổ nam chinh, Tống triều loạn lạc. Đại Việt`,
+      `Võ hiệp cổ điển, chơi ngải đa vũ trụ`,
     ];
 
     for (const child of e.children) {
@@ -37,9 +40,23 @@ async function downloadChapter(page, chapter) {
         e.removeChild(child);
       }
     }
+
     const textContent = e.innerHTML.replaceAll("<br>", "\n");
-    const lines = textContent.split("\n").map((line) => line.trim());
-    const cleanTextContent = lines
+    const lines = textContent
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    // Filter out lines after '======='
+    const validLines = [];
+    for (const line of lines) {
+      if (line.startsWith("====")) {
+        break;
+      }
+      validLines.push(line);
+    }
+    // Filter out lines starting with ad prefixes
+    const cleanTextContent = validLines
       .filter((line) => {
         for (const adPrefix of adPrefixes) {
           if (line.startsWith(adPrefix)) {
@@ -49,7 +66,6 @@ async function downloadChapter(page, chapter) {
 
         return true;
       })
-      .filter((line) => line.length > 0)
       .join("\n");
 
     return cleanTextContent;

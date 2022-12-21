@@ -5,6 +5,11 @@ const path = require("path");
 
 const { hideHeadless } = require("../../stealth");
 
+// Get config JSON
+const configJson = fs.readFileSync(path.join(__dirname, "./config.json"));
+const config = JSON.parse(configJson);
+const { titleUrl } = config;
+
 const VIEWPORT_WIDTH = 800;
 const VIEWPORT_HEIGHT = 600;
 
@@ -74,5 +79,5 @@ async function processChapterRows(rows) {
 
 (async () => {
   // TODO: Add series URL
-  await getChapterUrls("https://metruyencv.com/truyen/tu-2012-bat-dau");
+  await getChapterUrls(titleUrl);
 })();
